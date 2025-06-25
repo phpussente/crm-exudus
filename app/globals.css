@@ -1,0 +1,97 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 0 0% 100%;
+    --foreground: 222.2 84% 4.9%;
+    --card: 0 0% 100%;
+    --card-foreground: 222.2 84% 4.9%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 222.2 84% 4.9%;
+    --primary: 0 69% 54%;
+    --primary-foreground: 210 40% 98%;
+    --secondary: 210 40% 96%;
+    --secondary-foreground: 222.2 84% 4.9%;
+    --muted: 210 40% 96%;
+    --muted-foreground: 215.4 16.3% 46.9%;
+    --accent: 210 40% 96%;
+    --accent-foreground: 222.2 84% 4.9%;
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 210 40% 98%;
+    --border: 214.3 31.8% 91.4%;
+    --input: 214.3 31.8% 91.4%;
+    --ring: 0 69% 54%;
+    --radius: 0.5rem;
+  }
+
+  .dark {
+    --background: 0 0% 0%;
+    --foreground: 210 40% 98%;
+    --card: 0 0% 9%;
+    --card-foreground: 210 40% 98%;
+    --popover: 0 0% 9%;
+    --popover-foreground: 210 40% 98%;
+    --primary: 0 69% 54%;
+    --primary-foreground: 210 40% 98%;
+    --secondary: 0 0% 15%;
+    --secondary-foreground: 210 40% 98%;
+    --muted: 0 0% 15%;
+    --muted-foreground: 215 20.2% 65.1%;
+    --accent: 0 0% 15%;
+    --accent-foreground: 210 40% 98%;
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 210 40% 98%;
+    --border: 0 0% 15%;
+    --input: 0 0% 15%;
+    --ring: 0 69% 54%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+    min-height: 100vh;
+  }
+}
+
+@layer components {
+  .cyber-grid {
+    background-image: linear-gradient(rgba(217, 59, 59, 0.1) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(217, 59, 59, 0.1) 1px, transparent 1px);
+    background-size: 20px 20px;
+  }
+
+  .cyber-glow {
+    box-shadow: 0 0 10px rgba(217, 59, 59, 0.3);
+  }
+
+  .cyber-border {
+    border: 1px solid rgba(217, 59, 59, 0.3);
+    position: relative;
+  }
+
+  .cyber-border::before {
+    content: "";
+    position: absolute;
+    top: -1px;
+    left: -1px;
+    right: -1px;
+    bottom: -1px;
+    background: linear-gradient(45deg, transparent, rgba(217, 59, 59, 0.1), transparent);
+    z-index: -1;
+    border-radius: inherit;
+  }
+
+  .sidebar-collapsed {
+    width: 4rem;
+  }
+
+  .sidebar-expanded {
+    width: 16rem;
+  }
+}
