@@ -1,15 +1,9 @@
-import type React from "react"
-import type { Metadata } from "next"
-import { Inter } from "next/font/google"
-import "./globals.css"
-import { ThemeProvider } from "@/components/theme-provider"
+import './globals.css'
+import { Providers } from './providers'
 
-const inter = Inter({ subsets: ["latin"] })
-
-export const metadata: Metadata = {
-  title: "ExudusTech CRM - Gestão de Leads com IA",
-  description: "Sistema de CRM da ExudusTech para gestão completa de leads e clientes",
-  generator: "v0.dev",
+export const metadata = {
+  title: 'CRM ExudusTech',
+  description: 'CRM com NextAuth e Supabase',
 }
 
 export default function RootLayout({
@@ -18,11 +12,9 @@ export default function RootLayout({
   children: React.ReactNode
 }) {
   return (
-    <html lang="pt-BR" suppressHydrationWarning>
-      <body className={inter.className}>
-        <ThemeProvider attribute="class" defaultTheme="dark" enableSystem disableTransitionOnChange>
-          {children}
-        </ThemeProvider>
+    <html lang="pt-br">
+      <body>
+        <Providers>{children}</Providers>
       </body>
     </html>
   )

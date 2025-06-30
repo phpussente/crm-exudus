@@ -1,67 +1,64 @@
-import { type NextRequest, NextResponse } from "next/server"
-import { supabaseAdmin } from "@/lib/supabase"
+// app/api/users/route.ts
+import { NextRequest, NextResponse } from 'next/server';
+import { PrismaClient } from '@prisma/client';
+import { z } from 'zod';
+import { hash } from 'bcryptjs';
 
+const prisma = new PrismaClient();
+
+/* ---------- 1. Validação ---------- */
+const userSchema = z.object({
+  email: z.string().email(),
+  name: z.string().optional(),
+  password: z.string().min(4),
+});
+
+/* ---------- 2. GET: lista usuários ---------- */
 export async function GET() {
-  try {
-    const { data: users, error } = await supabaseAdmin
-      .from("users")
-      .select("id, email, name, role, created_at")
-      .order("created_at", { ascending: false })
-
-    if (error) {
-      console.error("Erro ao buscar usuários:", error)
-      return NextResponse.json({ error: "Erro interno do servidor" }, { status: 500 })
-    }
-
-    return NextResponse.json(users)
-  } catch (error) {
-    console.error("Erro ao buscar usuários:", error)
-    return NextResponse.json({ error: "Erro interno do servidor" }, { status: 500 })
-  }
+  const users = await prisma.user.findMany({
+    select: { id: true, email: true, name: true, createdAt: true },
+  });
+  return NextResponse.json(users);
 }
 
-export async function POST(request: NextRequest) {
+/* ---------- 3. POST: cria usuário ---------- */
+export async function POST(req: NextRequest) {
   try {
-    const data = await request.json()
-    const { name, email, role } = data
+    // 3.1  Lê e valida o corpo
+    const body = await req.json();
+    const data = userSchema.parse(body);
 
-    // Verificar se email já existe
-    const { data: existingUser, error: checkError } = await supabaseAdmin
-      .from("users")
-      .select("id")
-      .eq("email", email)
-      .single()
-
-    if (checkError && checkError.code !== "PGRST116") {
-      console.error("Erro ao verificar email:", checkError)
-      return NextResponse.json({ error: "Erro interno do servidor" }, { status: 500 })
+    // 3.2  Impede e-mail duplicado
+    const existing = await prisma.user.findUnique({
+      where: { email: data.email },
+    });
+    if (existing) {
+      return NextResponse.json(
+        { error: 'Email já cadastrado' },
+        { status: 400 },
+      );
     }
 
-    if (existingUser) {
-      return NextResponse.json({ error: "Email já está em uso" }, { status: 400 })
-    }
+    // 3.3  Gera hash seguro da senha
+    const hashedPassword = await hash(data.password, 10); // 10 = salt rounds
 
-    const { data: newUser, error } = await supabaseAdmin
-      .from("users")
-      .insert([
-        {
-          name,
-          email,
-          role,
-          password: "admin123", // Senha padrão
-        },
-      ])
-      .select("id, email, name, role, created_at")
-      .single()
+    // 3.4  Cria o usuário
+    const user = await prisma.user.create({
+      data: {
+        email: data.email,
+        name: data.name,
+        password: hashedPassword,
+      },
+      select: { id: true, email: true, name: true, createdAt: true },
+    });
 
-    if (error) {
-      console.error("Erro ao criar usuário:", error)
-      return NextResponse.json({ error: "Erro interno do servidor" }, { status: 500 })
-    }
-
-    return NextResponse.json(newUser, { status: 201 })
-  } catch (error) {
-    console.error("Erro ao criar usuário:", error)
-    return NextResponse.json({ error: "Erro interno do servidor" }, { status: 500 })
+    return NextResponse.json(user, { status: 201 });
+  } catch (err: any) {
+    return NextResponse.json(
+      { error: err?.message || 'Erro ao criar usuário' },
+      { status: 400 },
+    );
+  } finally {
+    await prisma.$disconnect();
   }
 }
